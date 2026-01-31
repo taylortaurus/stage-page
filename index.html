@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stage Smart Locator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 20px;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 600px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, #569cd6, #4ec9b0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #858585;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #4ec9b0;
+    }
+
+    .card p {
+      color: #a0a0a0;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 32px;
+      background: linear-gradient(90deg, #0e639c, #1177bb);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: linear-gradient(90deg, #1177bb, #0e639c);
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(14, 99, 156, 0.4);
+    }
+
+    .footer {
+      margin-top: 3rem;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: #569cd6;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Stage Smart Locator</h1>
+    <p class="subtitle">智能元素定位器调试工具</p>
+
+    <div class="card">
+      <div class="card-icon">🔍</div>
+      <h2>自动调试页面</h2>
+      <p>用于测试和调试 Stage Smart Locator Chrome 扩展的专用页面。包含多种测试元素和实时日志监控功能。</p>
+      <a href="./smart-locator/auto-debug.html" class="btn">进入调试页面</a>
+    </div>
+
+    <div class="footer">
+      <p>Powered by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p>
+    </div>
+  </div>
+</body>
+</html>

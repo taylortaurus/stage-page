@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自动调试页面</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: 0;
+      padding: 20px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: #569cd6;
+      margin-bottom: 20px;
+    }
+
+    .panel {
+      background: #252526;
+      border: 1px solid #3c3c3c;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      padding: 15px;
+    }
+
+    .panel h2 {
+      color: #4ec9b0;
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    .status {
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .status.success {
+      background: #0e639c;
+      color: #d7ba7d;
+    }
+
+    .status.error {
+      background: #f14c4c;
+      color: #ffffff;
+    }
+
+    .status.info {
+      background: #007acc;
+      color: #ffffff;
+    }
+
+    .log-entry {
+      padding: 5px 10px;
+      margin: 2px 0;
+      border-left: 3px solid #569cd6;
+      background: #2d2d30;
+      font-size: 12px;
+    }
+
+    .log-entry.error {
+      border-left-color: #f14c4c;
+      background: #2d2d30;
+      color: #f14c4c;
+    }
+
+    .log-entry.warning {
+      border-left-color: #cca700;
+      background: #2d2d30;
+      color: #cca700;
+    }
+
+    .log-entry.success {
+      border-left-color: #4ec9b0;
+      background: #2d2d30;
+      color: #4ec9b0;
+    }
+
+    .log-time {
+      color: #858585;
+      margin-right: 10px;
+    }
+
+    .test-elements {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .test-element {
+      padding: 30px;
+      text-align: center;
+      border: 3px solid;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+      background: #252526;
+    }
+
+    .test-element:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .test-element:active {
+      transform: scale(0.95);
+    }
+
+    .test-element.blue {
+      border-color: #4285f4;
+      color: #4285f4;
+    }
+
+    .test-element.green {
+      border-color: #34a853;
+      color: #34a853;
+    }
+
+    .test-element.red {
+      border-color: #ea4335;
+      color: #ea4335;
+    }
+
+    .test-element.yellow {
+      border-color: #fbbc04;
+      color: #fbbc04;
+    }
+
+    .counter {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #3c3c3c;
+      border-radius: 3px;
+      font-size: 11px;
+      margin-left: 5px;
+    }
+
+    .clear-btn {
+      background: #0e639c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .clear-btn:hover {
+      background: #1177bb;
+    }
+
+    #log-container {
+      max-height: 400px;
+      overflow-y: auto;
+      background: #1e1e1e;
+      border: 1px solid #3c3c3c;
+      padding: 10px;
+      border-radius: 4px;
+    }
+
+    .instructions {
+      background: #3c3c3c;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      border-left: 4px solid #4ec9b0;
+    }
+
+    .instructions ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Stage Smart Locator - 自动调试页面</h1>
+
+    <div class="instructions">
+      <h2 style="margin-top: 0; color: #4ec9b0;">使用步骤：</h2>
+      <ol>
+        <li>按F12打开开发者工具</li>
+        <li>点击"Elements"标签</li>
+        <li>在右侧找到"Stage Smart Locator"标签并点击</li>
+        <li>点击"🎯 选择元素"按钮</li>
+        <li>将鼠标移动到下方的彩色方块上</li>
+        <li>点击方块</li>
+        <li>观察本页面底部的日志输出</li>
+      </ol>
+    </div>
+
+    <div class="panel">
+      <h2>📊 状态监控</h2>
+      <div id="status-box" class="status info">等待开始...</div>
+      <div>
+        <strong>事件统计：</strong>
+        <span class="counter">点击: <span id="click-count">0</span></span>
+        <span class="counter">鼠标悬停: <span id="hover-count">0</span></span>
+        <span class="counter">消息: <span id="message-count">0</span></span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>📝 实时日志</h2>
+      <div id="log-container">
+        <!-- 日志将在这里显示 -->
+      </div>
+      <button class="clear-btn" onclick="clearLogs()">清空日志</button>
+    </div>
+
+    <div class="panel">
+      <h2>🧪 测试元素</h2>
+      <div class="test-elements">
+        <div id="element1" class="test-element blue">
+          元素 1<br>
+          <small>id="element1"</small>
+        </div>
+        <div id="element2" class="test-element green">
+          元素 2<br>
+          <small>id="element2"</small>
+        </div>
+        <div id="element3" class="test-element red">
+          元素 3<br>
+          <small>id="element3"</small>
+        </div>
+        <div id="element4" class="test-element yellow">
+          元素 4<br>
+          <small>id="element4"</small>
+        </div>
+        <div class="test-element" style="border-color: #9333ea; color: #9333ea;">
+          元素 5<br>
+          <small>无ID</small>
+        </div>
+        <div class="test-element" style="border-color: #f97316; color: #f97316;">
+          元素 6<br>
+          <small>class="custom"</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const logContainer = document.getElementById('log-container');
+    const statusBox = document.getElementById('status-box');
+    const clickCount = document.getElementById('click-count');
+    const hoverCount = document.getElementById('hover-count');
+    const messageCount = document.getElementById('message-count');
+
+    let clickCounter = 0;
+    let hoverCounter = 0;
+    let messageCounter = 0;
+
+    function addLog(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = `log-entry ${type}`;
+      div.innerHTML = `<span class="log-time">[${timestamp}]</span> ${message}`;
+      logContainer.appendChild(div);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      
+      // 同时输出到控制台
+      console.log(`[Auto Debug] ${message}`);
+    }
+
+    function updateStatus(message, type = 'info') {
+      statusBox.textContent = message;
+      statusBox.className = `status ${type}`;
+      addLog(`状态更新: ${message}`, type);
+    }
+
+    function clearLogs() {
+      logContainer.innerHTML = '';
+      addLog('日志已清空');
+    }
+
+    // 监听页面事件
+    document.addEventListener('DOMContentLoaded', () => {
+      addLog('=== 页面已加载 ===', 'success');
+      updateStatus('页面已加载，等待操作', 'success');
+    });
+
+    // 监听所有点击事件
+    document.addEventListener('click', (e) => {
+      clickCounter++;
+      clickCount.textContent = clickCounter;
+      
+      const target = e.target;
+      const id = target.id || '(无ID)';
+      const className = target.className;
+      const tagName = target.tagName.toLowerCase();
+      
+      addLog(`点击事件: ${tagName}${id ? '#' + id : ''}.${className.split(' ').join('.')}`, 'info');
+      
+      // 检查是否点击了测试元素
+      if (target.classList.contains('test-element')) {
+        addLog(`→ 测试元素被点击: ${target.textContent.split('\n')[0]}`, 'success');
+      }
+    }, true);
+
+    // 监听鼠标悬停事件
+    document.addEventListener('mouseover', (e) => {
+      if (e.target.classList.contains('test-element')) {
+        hoverCounter++;
+        hoverCount.textContent = hoverCounter;
+        const id = e.target.id || '(无ID)';
+        addLog(`鼠标悬停: ${e.target.tagName.toLowerCase()}${id ? '#' + id : ''}`, 'warning');
+      }
+    });
+
+    // 监听来自扩展的消息
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      messageCounter++;
+      messageCount.textContent = messageCounter;
+      
+      addLog(`收到扩展消息: ${JSON.stringify(message)}`, 'warning');
+      
+      // 更新状态
+      if (message.type === 'START_SELECT_MODE') {
+        updateStatus('选择模式已启动 - 请点击下方元素', 'success');
+      } else if (message.type === 'STOP_SELECT_MODE') {
+        updateStatus('选择模式已停止', 'info');
+      } else if (message.type === 'ELEMENT_SELECTED') {
+        updateStatus('元素已被选中 - 检查定位器生成', 'success');
+        addLog(`定位器: ${message.data?.locator || '未生成'}`, 'success');
+      } else if (message.type === 'STATUS') {
+        updateStatus(`扩展状态: ${message.data}`, 'info');
+      }
+      
+      return true;
+    });
+
+    // 测试发送消息到扩展
+    function testExtensionConnection() {
+      addLog('测试扩展连接...', 'info');
+      chrome.runtime.sendMessage({
+        type: 'PING',
+        data: 'Ping from auto-debug page'
+      }, (response) => {
+        if (chrome.runtime.lastError) {
+          addLog(`连接错误: ${chrome.runtime.lastError.message}`, 'error');
+          updateStatus('扩展连接失败', 'error');
+        } else {
+          addLog(`扩展响应: ${JSON.stringify(response)}`, 'success');
+          updateStatus('扩展连接正常', 'success');
+        }
+      });
+    }
+
+    // 定期检查扩展状态
+    function checkExtensionStatus() {
+      addLog('检查扩展状态...', 'info');
+      
+      // 检查是否在扩展环境
+      if (typeof chrome !== 'undefined' && chrome.runtime) {
+        addLog('Chrome扩展API可用', 'success');
+        testExtensionConnection();
+      } else {
+        addLog('Chrome扩展API不可用', 'error');
+        updateStatus('扩展API不可用', 'error');
+      }
+    }
+
+    // 页面加载完成后执行
+    window.addEventListener('load', () => {
+      addLog('窗口加载完成', 'success');
+      
+      setTimeout(() => {
+        checkExtensionStatus();
+      }, 1000);
+      
+      // 每5秒检查一次状态
+      setInterval(() => {
+        if (messageCounter === 0) {
+          addLog('未收到任何扩展消息 - 请检查扩展是否正确加载', 'warning');
+        }
+      }, 5000);
+    });
+
+    // 添加初始日志
+    addLog('=== 自动调试系统已启动 ===', 'info');
+    addLog('请按照上方步骤操作', 'info');
+  </script>
+</body>
+</html>
